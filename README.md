@@ -1,4 +1,4 @@
-# The-Perfect-Project
+# The Anatomy of the perfect Project
 
 ## The objective
 **Statement**: I aim to develop a state-of-the-art CRUD (Create, Read, Update, Delete) application that adheres to best practices in computer science and software engineering principles.
@@ -70,3 +70,11 @@
 ├── docker-compose.yml        # Docker Compose for multi-container setup
 └── README.md                 # Project documentation
 ```
+
+**_app.js**: The entry point for global styles and shared state.
+**api/submit.js**: Acts as a proxy for backend communication.
+**HistoryTable.js**: Displays history in a reusable UI component.
+**public/**: Houses static assets for use in the app.
+**styles/**: Provides CSS for global and component-level styling.
+**package.json**: Manages dependencies and scripts for development and production.
+**next.config.js**: Adds custom configurations for the app.
