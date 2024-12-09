@@ -1,71 +1,123 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from database import FirestoreDB
+from fastapi import FastAPI, HTTPException, Request, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 import logging
-import os
+from database import FirestoreDB
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-CORS(app)  # Allow Cross-Origin Resource Sharing
+# Initialize FastAPI app
+app = FastAPI(
+    title="Advanced Text Transformer API",
+    description="A state-of-the-art text transformation service",
+    version="1.0.0",
+)
 
-# Initialize Firestore Database
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add security headers
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """
+    Add security-related HTTP headers
+    """
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    return response
+
+# HTTP Bearer Token Authentication
+security = HTTPBearer()
+
+# Firestore Database instance
 db = FirestoreDB()
 
-@app.route('/api/submit', methods=['POST'])
-def submit():
+
+# Request Models
+class TextInput(BaseModel):
+    text: str
+
+
+# Routes
+@app.post("/api/submit", status_code=status.HTTP_201_CREATED)
+async def submit_text(input_data: TextInput, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Accept text input, convert to uppercase, save to Firestore, and return the result.
+    """
     try:
-        data = request.json
-        user_text = data.get('text')
-        if not user_text:
-            return jsonify({"error": "Text is required"}), 400
-        
-        processed_text = user_text.upper()
+        token = credentials.credentials  # Token can be validated if needed
+        original_text = input_data.text
+        if not original_text:
+            raise HTTPException(status_code=400, detail="Text is required")
+
+        processed_text = original_text.upper()
         logger.info(f"Processed text: {processed_text}")
 
         # Save to Firestore
-        entry = db.create_entry(user_text, processed_text)
+        entry = db.create_entry(original_text, processed_text)
+        return {"id": entry["id"], "original": original_text, "processed": processed_text}
 
-        return jsonify({"id": entry['id'], "original": user_text, "processed": processed_text}), 201
     except Exception as e:
         logger.error(f"Error in /api/submit: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.route('/api/history', methods=['GET'])
-def get_history():
+
+@app.get("/api/history", status_code=status.HTTP_200_OK)
+async def get_history(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Retrieve all history entries.
+    """
     try:
+        token = credentials.credentials
         history = db.read_all_entries()
-        return jsonify(history), 200
+        return history
     except Exception as e:
         logger.error(f"Error in /api/history: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.route('/api/history/<entry_id>', methods=['PUT'])
-def update_entry(entry_id):
+
+@app.put("/api/history/{entry_id}", status_code=status.HTTP_200_OK)
+async def update_entry(entry_id: str, input_data: TextInput, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Update an existing entry with new text.
+    """
     try:
-        data = request.json
-        new_text = data.get('text')
+        token = credentials.credentials
+        new_text = input_data.text
         if not new_text:
-            return jsonify({"error": "Text is required"}), 400
-        
+            raise HTTPException(status_code=400, detail="Text is required")
+
         processed_text = new_text.upper()
         updated_entry = db.update_entry(entry_id, new_text, processed_text)
+        return updated_entry
 
-        return jsonify(updated_entry), 200
     except Exception as e:
-        logger.error(f"Error in /api/history/<entry_id>: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        logger.error(f"Error in /api/history/{entry_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.route('/api/history/<entry_id>', methods=['DELETE'])
-def delete_entry(entry_id):
+
+@app.delete("/api/history/{entry_id}", status_code=status.HTTP_200_OK)
+async def delete_entry(entry_id: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Delete an entry from the history.
+    """
     try:
+        token = credentials.credentials
         db.delete_entry(entry_id)
-        return jsonify({"message": "Entry deleted"}), 200
+        return {"message": "Entry deleted"}
     except Exception as e:
-        logger.error(f"Error in /api/history/<entry_id>: {e}")
-        return jsonify({"error": "An error occurred"}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 8080)))
+        logger.error(f"Error in /api/history/{entry_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
