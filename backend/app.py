@@ -45,11 +45,9 @@ security = HTTPBearer()
 # Firestore Database instance
 db = FirestoreDB()
 
-
 # Request Models
 class TextInput(BaseModel):
     text: str
-
 
 # Routes
 @app.post("/api/submit", status_code=status.HTTP_201_CREATED)
@@ -74,7 +72,6 @@ async def submit_text(input_data: TextInput, credentials: HTTPAuthorizationCrede
         logger.error(f"Error in /api/submit: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-
 @app.get("/api/history", status_code=status.HTTP_200_OK)
 async def get_history(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
@@ -87,7 +84,6 @@ async def get_history(credentials: HTTPAuthorizationCredentials = Depends(securi
     except Exception as e:
         logger.error(f"Error in /api/history: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
 
 @app.put("/api/history/{entry_id}", status_code=status.HTTP_200_OK)
 async def update_entry(entry_id: str, input_data: TextInput, credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -107,7 +103,6 @@ async def update_entry(entry_id: str, input_data: TextInput, credentials: HTTPAu
     except Exception as e:
         logger.error(f"Error in /api/history/{entry_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
 
 @app.delete("/api/history/{entry_id}", status_code=status.HTTP_200_OK)
 async def delete_entry(entry_id: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
