@@ -12,7 +12,7 @@ class FirestoreDB:
         data = {
             "id": entry_id,
             "original": original,
-            "processed": processed
+            "processed": processed,
         }
         self.client.collection(self.collection_name).document(entry_id).set(data)
         return data
@@ -22,10 +22,7 @@ class FirestoreDB:
         return [doc.to_dict() for doc in docs]
 
     def update_entry(self, entry_id, original, processed):
-        data = {
-            "original": original,
-            "processed": processed
-        }
+        data = {"original": original, "processed": processed}
         self.client.collection(self.collection_name).document(entry_id).update(data)
         return self.client.collection(self.collection_name).document(entry_id).get().to_dict()
 
