@@ -1,9 +1,7 @@
 # The-Perfect-Project
 
 ## The objective
-
-Statement:
-I aim to develop a state-of-the-art CRUD (Create, Read, Update, Delete) application that adheres to best practices in computer science and software engineering principles.
+**Statement**: I aim to develop a state-of-the-art CRUD (Create, Read, Update, Delete) application that adheres to best practices in computer science and software engineering principles.
 
 ### Application Architecture:
 - Front-End: Developed using HTML and Next.js.
@@ -32,7 +30,7 @@ I aim to develop a state-of-the-art CRUD (Create, Read, Update, Delete) applicat
   - Leverage cutting-edge Next.js capabilities (e.g., Server-side Rendering [SSR] or Static Site Generation [SSG], if applicable).
 
  ## Project Layout
- 
+ ```
  crud-app/
 ├── backend/
 │   ├── app.py                # Flask application
@@ -60,3 +58,4 @@ I aim to develop a state-of-the-art CRUD (Create, Read, Update, Delete) applicat
 │   └── nginx.conf            # Reverse proxy configuration
 ├── docker-compose.yml        # Docker Compose for multi-container setup
 └── README.md                 # Project documentation
+```
