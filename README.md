@@ -31,14 +31,14 @@
  
 ### Security Features Added
 1. **Enhanced Middleware for Security Headers**:
-  - Added headers like Strict-Transport-Security, X-Content-Type-Options, and Content-Security-Policy.
+    - Added headers like Strict-Transport-Security, X-Content-Type-Options, and Content-Security-Policy.
 
 2. **HTTPBearer Authentication**:
-  -   Used FastAPI’s HTTPBearer dependency to secure endpoints.
-  -   Placeholder for token validation, which can be expanded based on your needs.
+    -   Used FastAPI’s HTTPBearer dependency to secure endpoints.
+    -   Placeholder for token validation, which can be expanded based on your needs.
 
 3. **CORS Middleware**:
-  - Configured to allow cross-origin requests. This should be restricted to trusted domains in production.
+    - Configured to allow cross-origin requests. This should be restricted to trusted domains in production.
 
  ## Project Layout
  ```
@@ -71,10 +71,14 @@
 └── README.md                 # Project documentation
 ```
 
-**_app.js**: The entry point for global styles and shared state.
-**api/submit.js**: Acts as a proxy for backend communication.
-**HistoryTable.js**: Displays history in a reusable UI component.
-**public/**: Houses static assets for use in the app.
-**styles/**: Provides CSS for global and component-level styling.
-**package.json**: Manages dependencies and scripts for development and production.
-**next.config.js**: Adds custom configurations for the app.
+- **_app.js**: The entry point for global styles and shared state.
+  - **Purpose**: It provides a global wrapper for your app, allowing you to import global CSS or manage shared state across pages.
+
+- **api/submit.js**: Acts as a proxy for backend communication.
+  - **Purpose**: This file bridges the frontend and backend by forwarding text submission requests. It makes API interactions easier to manage and debug.
+  
+- **HistoryTable.js**: Displays history in a reusable UI component.
+- **public/**: Houses static assets for use in the app.
+- **styles/**: Provides CSS for global and component-level styling.
+- **package.json**: Manages dependencies and scripts for development and production.
+- **next.config.js**: Adds custom configurations for the app.
